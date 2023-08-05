@@ -1,11 +1,3 @@
-import { Server } from "socket.io";
-
-export default function initSocket(server) {
-  const io = new Server(server, {
-    cors: {
-      origin: "*",
-      methods: "*",
-    },
-  });
+export default function initSocket(io) {
   io.on("connection", (socket) => {});
 }
