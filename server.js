@@ -9,7 +9,7 @@ import postAuthRouter from "./helpers/postAuthRouter.js";
 import initSocket from "./helpers/initSocket.js";
 // These lines make "require" available
 import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+export const require = createRequire(import.meta.url);
 dotenv.config();
 
 export const prisma = new PrismaClient();
@@ -17,12 +17,12 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT;
 const TESTING_MODE = true;
+const APPEND_USER = false;
 
 const io = require("socket.io")(server, {
   cors: {
     origin: "*",
     methods: "*",
-    // witCredentials: true,
   },
 });
 
@@ -32,7 +32,8 @@ app.use(cors());
 // pre auth router (login/signup)
 preAuthRouter(app);
 
-if (!TESTING_MODE) app.use(authenticateToken);
+if (!TESTING_MODE)
+  app.use((req, res, next) => authenticateToken(req, res, next, APPEND_USER));
 
 // post auth router
 postAuthRouter(app);
@@ -41,4 +42,6 @@ postAuthRouter(app);
 initSocket(io);
 
 // listen on port
-server.listen(PORT);
+server.listen(PORT, () => {
+  console.log("Running");
+});

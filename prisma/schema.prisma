@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["filteredRelationCount"]
 }
 
 datasource db {
@@ -11,77 +12,74 @@ datasource db {
 }
 
 model User {
-  id         Int          @id @default(autoincrement())
-  email      String
-  name       String
-  surname    String
-  password   String
-  Group_User Group_User[]
-  Item_User  Item_User[]
+  id            String       @id @default(uuid())
+  email         String       @unique
+  name          String
+  surname       String
+  password      String
+  emailVerified Boolean      @default(true)
+  Group_User    Group_User[]
+  Items         Item[]
 }
 
 model Group {
-  id                Int             @id @default(autoincrement())
+  id                String       @id @default(uuid())
   name              String
   needsConfirmation Boolean
   Group_User        Group_User[]
   Trip              Trip[]
-  User_Template     User_Template[]
 }
 
 model Group_User {
-  id        Int     @id @default(autoincrement())
+  id        String  @id @default(uuid())
   group     Group   @relation(fields: [groupId], references: [id])
-  groupId   Int
+  groupId   String
   user      User    @relation(fields: [userId], references: [id])
-  userId    Int
+  userId    String
   isAdmin   Boolean
   confirmed Boolean
 }
 
 model Trip {
-  id             Int      @id @default(autoincrement())
-  group          Group    @relation(fields: [groupId], references: [id])
-  groupId        Int
-  name           String
-  location       String?
-  meetupLocation String?
-  timestamp      DateTime
-  Item           Item[]
+  id              String   @id @default(uuid())
+  group           Group    @relation(fields: [groupId], references: [id])
+  groupId         String
+  name            String
+  location        String?
+  locationName    String?
+  meetup          String?
+  meetupName      String?
+  timestamp       DateTime
+  AllItems        Item[]   @relation("AllItems")
+  BroughtItems    Item[]   @relation("BroughtItems")
+  NotifiableItems Item[]   @relation("NotifiableItems")
 }
 
 model Item {
-  id             Int         @id @default(autoincrement())
-  trip           Trip        @relation(fields: [tripId], references: [id])
-  tripId         Int
-  name           String
-  numberOfPeople Int
-  confirmed      Boolean
-  Item_User      Item_User[]
+  id String @id @default(uuid())
+
+  Trip                Trip?   @relation("AllItems", fields: [tripId], references: [id])
+  // useless
+  BroughtOnTrip       Trip?   @relation("BroughtItems", fields: [tripId], references: [id])
+  NotifiedOnTrip      Trip?   @relation("NotifiableItems", fields: [tripId], references: [id])
+  // end of useless
+  tripId              String?
+  User                User?   @relation(fields: [userId], references: [id])
+  userId              String?
+  name                String
+  confirmedOnAdding   Boolean
+  requestedToBring    Boolean
+  confirmedOnBringing Boolean
+  brought             Boolean
 }
 
-model Item_User {
-  id             Int     @id @default(autoincrement())
-  user           User    @relation(fields: [userId], references: [id])
-  userId         Int
-  item           Item    @relation(fields: [itemId], references: [id])
-  itemId         Int
-  confirmed      Boolean
-  adminRequested Boolean
-}
-
-model User_Template {
-  id            Int             @id @default(autoincrement())
-  group         Group           @relation(fields: [groupId], references: [id])
-  groupId       Int
-  name          String
-  Item_Template Item_Template[]
-}
-
-model Item_Template {
-  id             Int           @id @default(autoincrement())
-  userTemplate   User_Template @relation(fields: [userTemplateId], references: [id])
-  userTemplateId Int
-  name           String
-  numberOfPeople Int
-}
+// Bringing Table
+// model Item_User {
+//   id        String  @id @default(uuid())
+//   user      User    @relation(fields: [userId], references: [id])
+//   userId    String
+//   item      Item    @relation(fields: [itemId], references: [id])
+//   itemId    String
+//   confirmed Boolean
+//   brought   Boolean
+// }
