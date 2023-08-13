@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
 import { prisma } from "../server.js";
+import { json } from "express";
 export default function preAuthRouter(app) {
   app.post("/signup", async (req, res) => {
     const user = await prisma.user.create({

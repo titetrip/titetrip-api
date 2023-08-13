@@ -16,8 +16,8 @@ export const prisma = new PrismaClient();
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT;
-const TESTING_MODE = true;
-const APPEND_USER = false;
+const TESTING_MODE = false;
+const APPEND_USER = true;
 
 const io = require("socket.io")(server, {
   cors: {
